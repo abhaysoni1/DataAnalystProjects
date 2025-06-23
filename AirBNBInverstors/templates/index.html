@@ -2,9 +2,138 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Airbnb ROI Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .left-panel {
+            flex: 7;
+            height: 100vh;
+        }
+
+        .right-panel {
+            flex: 3;
+            background-color: #ffffff;
+            padding: 40px 30px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        input[type="number"],
+        select {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        input[type="submit"] {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        label {
+            text-align: left;
+            font-weight: 500;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
+    <div class="left-panel">
+        {% if map_exists %}
+            <iframe src="/data/map.html"></iframe>
+        {% endif %}
+    </div>
 
+    <div class="right-panel">
+        <h1>📊 Airbnb ROI</h1>
+        <p>Estimate ROI by entering property cost and selecting a neighborhood group:</p>
+
+        <form method="post" action="/">
+            <label for="property_cost">Property Cost (USD)</label>
+            <input type="number" name="property_cost" id="property_cost" placeholder="e.g. 250000" required step="any" />
+
+            <label for="neighborhood_group">Neighborhood Group</label>
+            <select name="neighborhood_group" id="neighborhood_group">
+                {% for neighborhood in neighborhoods %}
+                    <option value="{{ neighborhood }}" {% if neighborhood == selected_neighborhood %}selected{% endif %}>
+                        {{ neighborhood }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <input type="submit" value="Generate Heatmap" />
+        </form>
+        {% if top5_listings %}
+    <h2 style="margin-top: 40px;">Top 5 ROI Properties</h2>
+    <table style="width:100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="border: 1px solid #ccc; padding: 8px;">Neighborhood</th>
+                <th style="border: 1px solid #ccc; padding: 8px;">Price ($)</th>
+                <th style="border: 1px solid #ccc; padding: 8px;">Occupancy Rate (%)</th>
+                <th style="border: 1px solid #ccc; padding: 8px;">Estimated ROI (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top5_listings %}
+                <tr>
+                    <td style="border: 1px solid #ccc; padding: 8px;">{{ row.neighbourhood }}</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">{{ row.price }}</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">{{ row.occupancy_rate|round(2) }}</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">{{ row.estimated_roi|round(2) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+    </div>
 </body>
 </html>
